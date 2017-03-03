@@ -39,7 +39,7 @@ namespace WCFClient
         private Client Client;
         private static string Host;
         private static string HostPort;
-        private ServiceHost ServiceHost;
+    //    private ServiceHost ServiceHost;
         private static System.ServiceModel.Channels.Binding GetTargetBinding()
         {
             System.ServiceModel.Channels.Binding result;
