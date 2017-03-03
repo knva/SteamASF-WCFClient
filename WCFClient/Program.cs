@@ -59,11 +59,11 @@ namespace WCFClient
             result.SendTimeout = new TimeSpan(0, 0, 60);
             return result;
         }
-        //初始化
+        //初始化ASF
         internal static void Init()
         {
 
-            Host = "106.184.7.15";
+            Host = "0.0.0.0";
             HostPort = "1242";
 
         }
