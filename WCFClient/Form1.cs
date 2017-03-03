@@ -8,25 +8,29 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.ServiceProcess;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace WCFClient
 {
-   
+
     public partial class Form1 : Form
     {
         private static Mwcf Wcf = new Mwcf();
         private int m_PresentMode = 1;
 
-        public Form1(string a )
+        public Form1(string a)
         {
             InitializeComponent();
             showInfo(a);
         }
         private void showInfo(string aux)
         {
-            textBox2.AppendText(aux);
-            textBox2.AppendText(Environment.NewLine);
+            DateTime DT = System.DateTime.Now;
+            string dt = System.DateTime.Now.ToString();
+            skinTextBox1.Text += string.Format("{0}|{1}", dt, aux);
+            skinTextBox1.Text += Environment.NewLine;
         }
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -40,14 +44,18 @@ namespace WCFClient
 
         private void button1_Click(object sender, EventArgs e)
         {
+
             string x = textBox1.Text;
-            string a = Wcf.SendCommand(x);
-            showInfo(a);
+            if (x.Length != 0)
+            {
+                string a = Wcf.SendCommand(x);
+                showInfo(a);
+            }
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
         {
-          
+
         }
 
         private void groupBox2_Enter(object sender, EventArgs e)
@@ -63,7 +71,7 @@ namespace WCFClient
         private void button2_Click(object sender, EventArgs e)
         {
             ExtractKeysFromClipBoardAndCopyToClipboard();
-           
+
         }
 
         private List<string> ExtractKeysFromString(string source)
@@ -103,13 +111,13 @@ namespace WCFClient
 
                 try
                 {
-                   // Clipboard.SetText(strKeys);
+                    // Clipboard.SetText(strKeys);
                     showInfo(strKeys);
-                    showInfo(string.Format("{0} keys have been save", listStrKeys.Count));
-                    //  textBox2.Text += (string.Format("{0} keys have been copied to clipboard", listStrKeys.Count));
+                    showInfo(string.Format("{0} Key被获取,正在激活.", listStrKeys.Count));
+                    //  skinTextBox1.Text += (string.Format("{0} keys have been copied to clipboard", listStrKeys.Count));
                     string stra = (string.Format("redeem {0}", strKeys));
                     showInfo(stra);
-                    string a  =   Wcf.SendCommand(stra);
+                    string a = Wcf.SendCommand(stra);
                     showInfo(a);
                 }
                 catch
@@ -119,13 +127,45 @@ namespace WCFClient
             }
             else
             {
-                showInfo(string.Format("No keys have been found."));
+                showInfo(string.Format("没有获取到KEY!"));
             }
         }
 
-        private void textBox2_TextChanged(object sender, EventArgs e)
+        private void skinButton1_Click(object sender, EventArgs e)
         {
-            textBox2.ScrollToCaret();
+            try
+            {
+                System.Diagnostics.Process.Start(@".\\ASF.exe", "--server");
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+            }
+        }
+
+
+        private void skinButton2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(@".\\ASF-ConfigGenerator.exe");
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+            }
+        }
+
+        private void skinButton3_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.ShowDialog();
+        }
+
+        private void skinButton4_Click(object sender, EventArgs e)
+        {
+            Login lg = new Login();
+            lg.ShowDialog();
         }
     }
 }

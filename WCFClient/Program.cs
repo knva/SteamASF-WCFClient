@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
+using System.Web;
+using System.Web.Script.Serialization;
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
+
 namespace WCFClient
 {
     [ServiceContract]
@@ -20,6 +26,8 @@ namespace WCFClient
     static class Program
     {
         private static Mwcf Wcf = new Mwcf();
+        private static HostData hd = new HostData();
+
         /// <summary>
         /// 应用程序的主入口点。
         /// </summary>
@@ -28,18 +36,34 @@ namespace WCFClient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Mwcf.Init();
-            string a = Wcf.SendCommand("version");
-            Application.Run(new Form1(a));
+           // bool running = ReadJson.ReadConfig(Mwcf w);
+            if (ReadJson.SetJson()&& ReadJson.ReadConfig(hd))
+            {
+                Mwcf.Init(hd);
+                string a = Wcf.SendCommand("version");
+                Application.Run(new Form1(a));
+            }
+            else
+            {
+                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+
+                Application.Exit();
+            }
+         
         }
     }
-
+    public class HostData
+    {
+        public string chost { get; set; }
+        public int chostport { get; set; }
+    }
     internal sealed class Mwcf : IWCF, IDisposable
     {
+       
         private Client Client;
         private static string Host;
         private static string HostPort;
-    //    private ServiceHost ServiceHost;
+        //    private ServiceHost ServiceHost;
         private static System.ServiceModel.Channels.Binding GetTargetBinding()
         {
             System.ServiceModel.Channels.Binding result;
@@ -54,17 +78,17 @@ namespace WCFClient
                 // Yes, also on Windows, for Mono<->Windows communication
                 Security = { Mode = SecurityMode.None }
             };
-            
+
 
             result.SendTimeout = new TimeSpan(0, 0, 60);
             return result;
         }
-        //初始化ASF
-        internal static void Init()
+        //初始化
+        internal static void Init(HostData h)
         {
 
-            Host = "0.0.0.0";
-            HostPort = "1242";
+            Host = h.chost;
+            HostPort = string.Format("{0}",h.chostport);
 
         }
 
@@ -99,8 +123,12 @@ namespace WCFClient
                     new EndpointAddress(url)
                 );
             }
-
-            return Client.HandleCommand(input);
+            string result = Client.HandleCommand(input);
+            if (result==null)
+            {
+                result = "没有返回值,ASF.exe没有运行,或者配置错误.";
+            }
+            return result;
         }
         private static string GetUrlFromBinding(System.ServiceModel.Channels.Binding binding)
         {
@@ -109,7 +137,7 @@ namespace WCFClient
                 return binding.Scheme + "://" + Mwcf.Host + ":" + Mwcf.HostPort + "/ASF";
             }
 
-           // ASF.ArchiLogger.LogNullError(nameof(binding));
+            // ASF.ArchiLogger.LogNullError(nameof(binding));
             return null;
         }
 
@@ -128,11 +156,7 @@ namespace WCFClient
             throw new NotImplementedException();
         }
 
-      
-
     }
-
-
 
     internal sealed class Client : ClientBase<IWCF>
     {
@@ -153,9 +177,112 @@ namespace WCFClient
             }
             catch (Exception e)
             {
+                
                 //ASF.ArchiLogger.LogGenericException(e);
                 return null;
             }
+        }
+    }
+    public class Data
+    {
+        public bool AutoRestart { get; set; }
+        public bool AutoUpdates { get; set; }
+        public int[] Blacklist { get; set; }
+        public int ConnectionTimeout { get; set; }
+        public bool Debug { get; set; }
+        public int FarmingDelay { get; set; }
+        public int GiftsLimiterDelay { get; set; }
+        public bool Headless { get; set; }
+        public int IdleFarmingPeriod { get; set; }
+        public int InventoryLimiterDelay { get; set; }
+        public int LoginLimiterDelay { get; set; }
+        public int MaxFarmingTime { get; set; }
+        public int MaxTradeHoldDuration { get; set; }
+        public int OptimizationMode { get; set; }
+        public bool Statistics { get; set; }
+        public UInt64 SteamOwnerID { get; set; }
+        public int SteamProtocol { get; set; }
+        public int UpdateChannel { get; set; }
+        public int WCFBinding { get; set; }
+        public string WCFHost { get; set; }
+        public int WCFPort { get; set; }
+    }
+
+    public class JsonPaserWeb
+    {
+        // Object->Json
+        public string Serialize(Data obj)
+        {
+            JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
+            string json = jsonSerializer.Serialize(obj);
+            return json;
+        }
+
+        // Json->Object
+        public Data Deserialize(string json)
+        {
+            JavaScriptSerializer jsonSerializer = new JavaScriptSerializer();
+            //执行反序列化
+            Data obj = jsonSerializer.Deserialize<Data>(json);
+            return obj;
+        }
+    }
+    internal sealed class ReadJson
+    {
+        public static bool SetJson()
+        {
+            try
+            {
+                JsonSerializer serialiser = new JsonSerializer();
+                string newContent = string.Empty;
+                using (StreamReader reader = new StreamReader(".\\config\\ASF.json"))
+                {
+                    string json = reader.ReadToEnd();
+
+                    dynamic jsonObj = JsonConvert.DeserializeObject(json);
+                    jsonObj["WCFBinding"] = 2;
+                    jsonObj["WCFHost"] = "127.0.0.1";
+                    jsonObj["WCFPort"] = 1242;
+                    newContent = JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
+                    reader.Close();
+                    FileStream fs = new FileStream(".\\config\\ASF.json", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.Write(newContent);
+                    sw.Close();
+                }
+            }
+            catch (IOException e)
+            {
+                return false;
+            }
+    
+            return true;
+
+           
+        }
+        public static bool ReadConfig(HostData w)
+        {
+
+            string jsondata;
+            try
+            {
+               // FileStream file = new FileStream(".\\config\\ASF.json", FileMode.Open);
+                StreamReader sr = new StreamReader(".\\config\\ASF.json", Encoding.Default);
+                jsondata = sr.ReadToEnd();
+                sr.Close();
+
+            }
+            catch (IOException e)
+            {
+                
+                return false;
+            }
+
+            JsonPaserWeb json = new JsonPaserWeb();
+            Data s = json.Deserialize(jsondata);
+            w.chost = s.WCFHost;
+            w.chostport = s.WCFPort;
+            return true;
         }
     }
 }
