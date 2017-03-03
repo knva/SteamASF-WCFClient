@@ -1,0 +1,9 @@
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\bin\Debug\WCFClient.exe.config
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\bin\Debug\WCFClient.exe
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\bin\Debug\WCFClient.pdb
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\obj\Debug\WCFClient.csprojResolveAssemblyReference.cache
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\obj\Debug\WCFClient.Properties.Resources.resources
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\obj\Debug\WCFClient.csproj.GenerateResource.Cache
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\obj\Debug\WCFClient.exe
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\obj\Debug\WCFClient.pdb
+F:\MYCODE\16\cskintest\WCFClient\WCFClient\obj\Debug\WCFClient.Form1.resources
