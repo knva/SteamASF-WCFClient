@@ -45,5 +45,10 @@ namespace WCFClient
             sw.Close();
             this.Close();
         }
+
+        private void Login_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

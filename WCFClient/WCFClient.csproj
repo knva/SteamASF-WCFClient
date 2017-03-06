@@ -57,10 +57,25 @@
     <ManifestKeyFile>WCFClient_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>WCFClient_TemporaryKey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ASF.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CSkin">
@@ -92,6 +107,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EnterCommands.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EnterCommands.Designer.cs">
+      <DependentUpon>EnterCommands.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,8 +131,23 @@
     <Compile Include="Login.Designer.cs">
       <DependentUpon>Login.cs</DependentUpon>
     </Compile>
+    <Compile Include="MoreReg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MoreReg.Designer.cs">
+      <DependentUpon>MoreReg.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetGames.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetGames.Designer.cs">
+      <DependentUpon>SetGames.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="EnterCommands.resx">
+      <DependentUpon>EnterCommands.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -120,6 +156,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Login.resx">
       <DependentUpon>Login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MoreReg.resx">
+      <DependentUpon>MoreReg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -131,6 +170,10 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SetGames.resx">
+      <DependentUpon>SetGames.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -151,6 +194,7 @@
     <None Include="7f623ee3f773bc93bc8422d3f1af9cd0aa441be0.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ASF.ico" />
     <Content Include="Llibrary\Newtonsoft.Json.dll" />
     <Content Include="Llibrary\Newtonsoft.Json.xml" />
   </ItemGroup>

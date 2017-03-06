@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.ServiceModel.Channels;
-using System.ServiceModel.Description;
-using System.Web;
 using System.Web.Script.Serialization;
 using System.IO;
 using System.Text;
@@ -40,7 +34,7 @@ namespace WCFClient
             if (ReadJson.SetJson()&& ReadJson.ReadConfig(hd))
             {
                 Mwcf.Init(hd);
-                string a = Wcf.SendCommand("version");
+                string a = "本程序必须使用管理员权限运行.\n作者不承担一切后果.风险自负!";
                 Application.Run(new Form1(a));
             }
             else
@@ -243,6 +237,7 @@ namespace WCFClient
                     jsonObj["WCFBinding"] = 2;
                     jsonObj["WCFHost"] = "127.0.0.1";
                     jsonObj["WCFPort"] = 1242;
+                    jsonObj["SteamOwnerID"] = 77777777777777777;
                     newContent = JsonConvert.SerializeObject(jsonObj, Newtonsoft.Json.Formatting.Indented);
                     reader.Close();
                     FileStream fs = new FileStream(".\\config\\ASF.json", FileMode.OpenOrCreate, FileAccess.ReadWrite);

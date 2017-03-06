@@ -18,7 +18,8 @@ namespace WCFClient
     public partial class Form1 : Form
     {
         private static Mwcf Wcf = new Mwcf();
-        private int m_PresentMode = 1;
+        private int IsRunning = 0;
+        private int pNum = 0;
 
         public Form1(string a)
         {
@@ -32,110 +33,65 @@ namespace WCFClient
             skinTextBox1.Text += string.Format("{0}|{1}", dt, aux);
             skinTextBox1.Text += Environment.NewLine;
         }
+        private void showStatus(string aux)
+        {
+            try
+            { 
+                  skinLabel2.Text = aux;
+            }
+            catch(Win32Exception e)
+            {
+
+            }
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            System.Timers.Timer pTimer = new System.Timers.Timer(1000);//每隔1秒执行一次，没用winfrom自带的
+            pTimer.Elapsed += pTimer_Elapsed;//委托，要执行的方法
+            pTimer.AutoReset = true;//获取该定时器自动执行
+            pTimer.Enabled = true;//这个一定要写，要不然定时器不会执行的
+            Control.CheckForIllegalCrossThreadCalls = false;
         }
-
-        private void label1_Click(object sender, EventArgs e)
+        private void pTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-            string x = textBox1.Text;
-            if (x.Length != 0)
+            if (pNum == 10)
             {
-                string a = Wcf.SendCommand(x);
-                showInfo(a);
-            }
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox2_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            ExtractKeysFromClipBoardAndCopyToClipboard();
-
-        }
-
-        private List<string> ExtractKeysFromString(string source)
-        {
-            MatchCollection m = Regex.Matches(source, "([0-9A-Z]{5})(?:\\-[0-9A-Z]{5}){2,3}",
-                  RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            List<string> result = new List<string>();
-            if (m.Count > 0)
-            {
-                foreach (Match v in m)
+                string str = Wcf.SendCommand("status");
+                if (str.Length != 0)
                 {
-                    result.Add(v.Value);
+                    showInfo(str);
                 }
-            }
-            return result;
-        }
-        private void ExtractKeysFromClipBoardAndCopyToClipboard()
-        {
-            string plainText;
-            plainText = textBox3.Text;
-
-            List<string> listStrKeys = ExtractKeysFromString(plainText);
-            if (listStrKeys.Count > 0)
-            {
-                string strKeys;
-
-                switch (m_PresentMode)
-                {
-                    case 1:
-                        strKeys = string.Join(",", listStrKeys.ToArray());
-                        break;
-                    case 0:
-                    default:
-                        strKeys = string.Join(Environment.NewLine, listStrKeys.ToArray());
-                        break;
-                }
-
-                try
-                {
-                    // Clipboard.SetText(strKeys);
-                    showInfo(strKeys);
-                    showInfo(string.Format("{0} Key被获取,正在激活.", listStrKeys.Count));
-                    //  skinTextBox1.Text += (string.Format("{0} keys have been copied to clipboard", listStrKeys.Count));
-                    string stra = (string.Format("redeem {0}", strKeys));
-                    showInfo(stra);
-                    string a = Wcf.SendCommand(stra);
-                    showInfo(a);
-                }
-                catch
-                {
-                    MessageBox.Show(strKeys, "Ctrl+C to copy");
-                }
+                pNum = 0;
             }
             else
             {
-                showInfo(string.Format("没有获取到KEY!"));
+                showStatus(string.Format("{0}秒后更新状态", 10 - pNum));
+                pNum++;
             }
         }
 
+
+
+
         private void skinButton1_Click(object sender, EventArgs e)
         {
+            if (skinButton1.Text == "重新加载ASF")
+            {
+                Wcf.SendCommand("restart");
+                return;
+            }
             try
             {
-                System.Diagnostics.Process.Start(@".\\ASF.exe", "--server");
+
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+
+                process.StartInfo.FileName = "ASF.exe";   //asf
+                process.StartInfo.Arguments = "--server";
+
+                process.Start();
+                //IsRunning= process.Id;
+                启动ASFToolStripMenuItem.Text = "重新加载ASF";
+                skinButton1.Text = "重新加载ASF";
             }
             catch (System.IO.FileNotFoundException)
             {
@@ -166,6 +122,92 @@ namespace WCFClient
         {
             Login lg = new Login();
             lg.ShowDialog();
+        }
+
+
+        private void 启动ASFToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            skinButton1_Click(sender, e);
+        }
+
+        private void 配置ASFToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(@".\\ASF-ConfigGenerator.exe");
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+            }
+        }
+
+        private void 打开ASFjsonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(@"notepad.exe", "./config/ASF.json");
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+            }
+        }
+
+        private void 批量激活ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MoreReg Mreg = new MoreReg();
+            Mreg.ShowDialog();
+        }
+
+        private void 查看状态ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showInfo(Wcf.SendCommand("status"));
+        }
+
+        private void 查看版本ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showInfo(Wcf.SendCommand("version"));
+        }
+
+        private void 暂停挂机ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showInfo(Wcf.SendCommand("pause"));
+        }
+
+        private void 添加账号ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Login lg = new Login();
+            lg.ShowDialog();
+        }
+
+        private void 挂机指定游戏ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetGames Sgames = new SetGames();
+            Sgames.ShowDialog();
+        }
+
+        private void 手动指令ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EnterCommands enc = new EnterCommands();
+            enc.ShowDialog();
+        }
+
+        private void 指令手册ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            skinButton3_Click(sender, e);
+
+
+        }
+
+        private void skinButton5_Click(object sender, EventArgs e)
+        {
+            skinTextBox1.Text = "";
+        }
+
+        private void 退出ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
