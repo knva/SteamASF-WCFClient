@@ -1,26 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.ServiceProcess;
-using Newtonsoft.Json;
-using System.IO;
-
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 namespace WCFClient
 {
 
     public partial class Form1 : Form
     {
+     
+        //const int SW_HIDE = 0;
+        //const int SW_SHOWNORMAL = 1;
+        //const int SW_SHOWMINIMIZED = 2;
+        //const int SW_SHOWMAXIMIZED = 3;
+
+        //[DllImport("User32.dll")]
+        //public static extern bool ShowWindow(IntPtr HWND, int MSG);
+        //[DllImport("User32.dll")]
+        //public static extern IntPtr FindWindow(string ClassN, string WindN);
+        [DllImport("user32.dll")]
+        public static extern bool AddClipboardFormatListener(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
+
+        const int WM_CLIPBOARDUPDATE = 0x031D;
+        const int WM_COPYDATA = 0x004A;
         private static Mwcf Wcf = new Mwcf();
-        private int IsRunning = 0;
+       
         private int pNum = 0;
 
+        private bool RunFlag = false;
+
+      
         public Form1(string a)
         {
             InitializeComponent();
@@ -30,8 +47,8 @@ namespace WCFClient
         {
             DateTime DT = System.DateTime.Now;
             string dt = System.DateTime.Now.ToString();
-            skinTextBox1.Text += string.Format("{0}|{1}", dt, aux);
-            skinTextBox1.Text += Environment.NewLine;
+            skinTextBox1.Text += string.Format(@"{0}|{1}", dt, aux);
+            skinTextBox1.Text += @Environment.NewLine;
         }
         private void showStatus(string aux)
         {
@@ -41,7 +58,7 @@ namespace WCFClient
             }
             catch(Win32Exception e)
             {
-
+                Console.WriteLine(e);
             }
         }
         private void Form1_Load(object sender, EventArgs e)
@@ -51,6 +68,8 @@ namespace WCFClient
             pTimer.AutoReset = true;//获取该定时器自动执行
             pTimer.Enabled = true;//这个一定要写，要不然定时器不会执行的
             Control.CheckForIllegalCrossThreadCalls = false;
+
+    
         }
         private void pTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
@@ -67,6 +86,10 @@ namespace WCFClient
             {
                 showStatus(string.Format("{0}秒后更新状态", 10 - pNum));
                 pNum++;
+                if(pNum==10)
+                {
+                    pNum = 0;
+                }
             }
         }
 
@@ -89,6 +112,8 @@ namespace WCFClient
                 process.StartInfo.Arguments = "--server";
 
                 process.Start();
+              
+              
                 //IsRunning= process.Id;
                 启动ASFToolStripMenuItem.Text = "重新加载ASF";
                 skinButton1.Text = "重新加载ASF";
@@ -102,14 +127,7 @@ namespace WCFClient
 
         private void skinButton2_Click(object sender, EventArgs e)
         {
-            try
-            {
-                System.Diagnostics.Process.Start(@".\\ASF-ConfigGenerator.exe");
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
-            }
+            批量激活ToolStripMenuItem_Click(sender, e);
         }
 
         private void skinButton3_Click(object sender, EventArgs e)
@@ -172,7 +190,15 @@ namespace WCFClient
 
         private void 暂停挂机ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            showInfo(Wcf.SendCommand("pause"));
+            if (RunFlag) { 
+                showInfo(Wcf.SendCommand("pause"));
+                RunFlag = false;
+            }
+            else
+            { 
+                showInfo(Wcf.SendCommand("start"));
+                RunFlag = true;
+            }
         }
 
         private void 添加账号ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -209,5 +235,184 @@ namespace WCFClient
         {
             Application.Exit();
         }
+
+        private void skinTextBox1_Paint(object sender, PaintEventArgs e)
+        {
+            
+        }
+        private static  Socket s;
+        private static byte[] result = new byte[1024];
+        
+        private void skinCheckBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (skinCheckBox1.Checked)
+            {
+                AddClipboardFormatListener(this.Handle);
+
+                int port = 12000;
+                string host = "127.0.0.1";
+
+                //创建终结点
+                IPAddress ip = IPAddress.Parse(host);
+                IPEndPoint ipe = new IPEndPoint(ip, port);
+
+                //创建Socket并开始监听
+
+                s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //创建一个Socket对象，如果用UDP协议，则要用SocketTyype.Dgram类型的套接字
+                s.Bind(ipe);    //绑定EndPoint对象(2000端口和ip地址)
+                s.Listen(0);    //开始监听
+                Thread myThread = new Thread(ListenClientConnect);
+                myThread.Start();
+            }
+            else
+            {
+                RemoveClipboardFormatListener(this.Handle);
+                s.Close();
+            }
+        }
+
+        /// <summary>  
+        /// 监听客户端连接  
+        /// </summary>  
+        private  void ListenClientConnect()
+        {
+            while (true)
+            {
+                Socket clientSocket = s.Accept();
+                //clientSocket.Send(Encoding.ASCII.GetBytes("Server Say Hello"));
+                Thread receiveThread = new Thread(ReceiveMessage);
+                receiveThread.Start(clientSocket);
+            }
+        }
+        
+        /// <summary>  
+        /// 接收消息  
+        /// </summary>  
+        /// <param name="clientSocket"></param>  
+        private  void ReceiveMessage(object clientSocket)
+        {
+            Socket myClientSocket = (Socket)clientSocket;
+            while (true)
+            {
+                try
+                {
+                    //通过clientSocket接收数据  
+                    int receiveNumber = myClientSocket.Receive(result);
+                    string msg = string.Format("接收客户端{0}消息{1}", myClientSocket.RemoteEndPoint.ToString(), Encoding.ASCII.GetString(result, 0, receiveNumber));
+                    ExtractKeysAndReg(msg, 1);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    myClientSocket.Shutdown(SocketShutdown.Both);
+                    myClientSocket.Close();
+                    break;
+                }
+            }
+        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            RemoveClipboardFormatListener(this.Handle);
+            s.Close();
+        }
+
+        protected override void DefWndProc(ref Message m)
+        {
+            string message;
+             if(m.Msg==0x444)
+            {
+                MessageBox.Show("!");
+            }
+            switch (m.Msg)
+            {
+                 case 0x0444://处理消息 :
+                    message = string.Format("{0}", m.LParam);
+                    ExtractKeysAndReg(message,1);
+                    break;
+                case WM_CLIPBOARDUPDATE:
+                    CopyFromClipboard();
+                    break;
+                default:
+                    base.DefWndProc(ref m);
+                    break;
+            }
+
+        }
+        private void CopyFromClipboard()
+        {
+            string clipstr ="";
+
+            try
+            {
+                clipstr = Clipboard.GetText();
+            }
+            catch(System.Runtime.InteropServices.ExternalException e)
+            {
+                return;
+            }
+          
+            if (clipstr.Length > 10)
+            {
+                ExtractKeysAndReg(clipstr, 1);
+            }
+        }
+
+        private void ExtractKeysAndReg(string plainText, int showMode)
+        {
+            List<string> listStrKeys = ExtractKeysFromString(plainText);
+            if (listStrKeys.Count > 0)
+            {
+                string strKeys;
+
+
+                strKeys = string.Join(",", listStrKeys.ToArray());
+                try
+                {
+                    // Clipboard.SetText(strKeys);
+                    // showInfo(strKeys);
+                    if (showMode == 0)
+                    {
+                        showInfo(string.Format("{0} Key被获取,正在激活.", listStrKeys.Count));
+                    }
+                    //  skinTextBox1.Text += (string.Format("{0} keys have been copied to clipboard", listStrKeys.Count));
+                    string stra = (string.Format("redeem {0}", strKeys));
+                    //showInfo(stra);
+                    string a = Wcf.SendCommand(stra);
+
+                    showInfo(a);
+
+                }
+                catch
+                {
+                    MessageBox.Show(strKeys, "Ctrl+C to copy");
+                }
+            }
+            else
+            {
+                if (showMode == 0)
+                {
+                    showInfo(string.Format("没有获取到KEY!"));
+                }
+            }
+
+        }
+
+        private List<string> ExtractKeysFromString(string source)
+        {
+            MatchCollection m = Regex.Matches(source, "([0-9A-Z]{5})(?:\\-[0-9A-Z]{5}){2,3}",
+                  RegexOptions.IgnoreCase | RegexOptions.Singleline);
+            List<string> result = new List<string>();
+            if (m.Count > 0)
+            {
+                foreach (Match v in m)
+                {
+                    result.Add(v.Value);
+                }
+            }
+            return result;
+        }
+
+
+
     }
 }

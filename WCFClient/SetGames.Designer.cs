@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetGames));
             this.skinTextBox1 = new CCWin.SkinControl.SkinTextBox();
             this.skinLabel1 = new CCWin.SkinControl.SkinLabel();
             this.skinButton1 = new CCWin.SkinControl.SkinButton();
@@ -69,9 +70,10 @@
             this.skinTextBox1.SkinTxt.Name = "BaseText";
             this.skinTextBox1.SkinTxt.Size = new System.Drawing.Size(175, 18);
             this.skinTextBox1.SkinTxt.TabIndex = 0;
-            this.skinTextBox1.SkinTxt.Text = "skinTextBox1";
+            this.skinTextBox1.SkinTxt.Text = " ";
             this.skinTextBox1.SkinTxt.WaterColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(127)))), ((int)(((byte)(127)))));
             this.skinTextBox1.SkinTxt.WaterText = "";
+            this.skinTextBox1.SkinTxt.WordWrap = false;
             this.skinTextBox1.TabIndex = 0;
             this.skinTextBox1.Text = " ";
             this.skinTextBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
@@ -114,6 +116,7 @@
             this.Controls.Add(this.skinButton1);
             this.Controls.Add(this.skinLabel1);
             this.Controls.Add(this.skinTextBox1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SetGames";
             this.Text = "挂指定游戏";
             this.ResumeLayout(false);

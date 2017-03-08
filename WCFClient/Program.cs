@@ -5,6 +5,7 @@ using System.Web.Script.Serialization;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
+using System.Threading;
 
 namespace WCFClient
 {
@@ -30,21 +31,42 @@ namespace WCFClient
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-           // bool running = ReadJson.ReadConfig(Mwcf w);
-            if (ReadJson.SetJson()&& ReadJson.ReadConfig(hd))
-            {
-                Mwcf.Init(hd);
-                string a = "本程序必须使用管理员权限运行.\n作者不承担一切后果.风险自负!";
-                Application.Run(new Form1(a));
-            }
-            else
-            {
-                MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+            // bool running = ReadJson.ReadConfig(Mwcf w);
+            if (false) {
 
-                Application.Exit();
+                if (ReadJson.SetJson() && ReadJson.ReadConfig(hd))
+                {
+                    Mwcf.Init(hd);
+                    string a = "本程序必须使用管理员权限运行.\n作者不承担一切后果.风险自负!";
+                    Application.Run(new Form1(a));
+                }
+                else
+                {
+                    MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+
+                    Application.Exit();
+                }
+            }
+           else
+            {
+                if ( ReadJson.ReadConfig(hd))
+                {
+                    Mwcf.Init(hd);
+                    string a = "本程序必须使用管理员权限运行.\n作者不承担一切后果.风险自负!";
+                    Application.Run(new Form1(a));
+                }
+                else
+                {
+                    MessageBox.Show("没有发现ASF,请放在ASF目录下使用.");
+
+                    Application.Exit();
+                }
+
             }
          
         }
+
+
     }
     public class HostData
     {
@@ -85,7 +107,7 @@ namespace WCFClient
             HostPort = string.Format("{0}",h.chostport);
 
         }
-
+    
         internal string SendCommand(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -171,7 +193,7 @@ namespace WCFClient
             }
             catch (Exception e)
             {
-                
+                Console.WriteLine(e);
                 //ASF.ArchiLogger.LogGenericException(e);
                 return null;
             }
@@ -248,6 +270,7 @@ namespace WCFClient
             }
             catch (IOException e)
             {
+                Console.WriteLine(e);
                 return false;
             }
     
@@ -269,7 +292,7 @@ namespace WCFClient
             }
             catch (IOException e)
             {
-                
+                Console.WriteLine(e);
                 return false;
             }
 

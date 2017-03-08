@@ -56,6 +56,7 @@
             this.作者信息ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.指令手册ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.skinButton5 = new CCWin.SkinControl.SkinButton();
+            this.skinCheckBox1 = new CCWin.SkinControl.SkinCheckBox();
             this.skinMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -94,7 +95,7 @@
             this.skinButton2.NormlBack = null;
             this.skinButton2.Size = new System.Drawing.Size(75, 23);
             this.skinButton2.TabIndex = 7;
-            this.skinButton2.Text = "配置ASF";
+            this.skinButton2.Text = "批量激活";
             this.skinButton2.UseVisualStyleBackColor = false;
             this.skinButton2.Click += new System.EventHandler(this.skinButton2_Click);
             // 
@@ -154,6 +155,7 @@
             this.skinTextBox1.WaterColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(127)))), ((int)(((byte)(127)))));
             this.skinTextBox1.WaterText = "";
             this.skinTextBox1.WordWrap = true;
+            this.skinTextBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.skinTextBox1_Paint);
             // 
             // skinButton3
             // 
@@ -358,13 +360,13 @@
             // 作者信息ToolStripMenuItem
             // 
             this.作者信息ToolStripMenuItem.Name = "作者信息ToolStripMenuItem";
-            this.作者信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.作者信息ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.作者信息ToolStripMenuItem.Text = "关于";
             // 
             // 指令手册ToolStripMenuItem
             // 
             this.指令手册ToolStripMenuItem.Name = "指令手册ToolStripMenuItem";
-            this.指令手册ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.指令手册ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.指令手册ToolStripMenuItem.Text = "指令手册";
             this.指令手册ToolStripMenuItem.Click += new System.EventHandler(this.指令手册ToolStripMenuItem_Click);
             // 
@@ -383,11 +385,32 @@
             this.skinButton5.UseVisualStyleBackColor = false;
             this.skinButton5.Click += new System.EventHandler(this.skinButton5_Click);
             // 
+            // skinCheckBox1
+            // 
+            this.skinCheckBox1.AutoSize = true;
+            this.skinCheckBox1.BackColor = System.Drawing.Color.Transparent;
+            this.skinCheckBox1.ControlState = CCWin.SkinClass.ControlState.Normal;
+            this.skinCheckBox1.DownBack = null;
+            this.skinCheckBox1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.skinCheckBox1.Location = new System.Drawing.Point(262, 326);
+            this.skinCheckBox1.MouseBack = null;
+            this.skinCheckBox1.Name = "skinCheckBox1";
+            this.skinCheckBox1.NormlBack = null;
+            this.skinCheckBox1.SelectedDownBack = null;
+            this.skinCheckBox1.SelectedMouseBack = null;
+            this.skinCheckBox1.SelectedNormlBack = null;
+            this.skinCheckBox1.Size = new System.Drawing.Size(147, 21);
+            this.skinCheckBox1.TabIndex = 15;
+            this.skinCheckBox1.Text = "监听剪贴板并自动激活";
+            this.skinCheckBox1.UseVisualStyleBackColor = false;
+            this.skinCheckBox1.CheckedChanged += new System.EventHandler(this.skinCheckBox1_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(597, 345);
+            this.Controls.Add(this.skinCheckBox1);
             this.Controls.Add(this.skinButton5);
             this.Controls.Add(this.skinLabel2);
             this.Controls.Add(this.skinButton4);
@@ -439,6 +462,7 @@
         private System.Windows.Forms.ToolStripMenuItem 手动指令ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 指令手册ToolStripMenuItem;
         private CCWin.SkinControl.SkinButton skinButton5;
+        private CCWin.SkinControl.SkinCheckBox skinCheckBox1;
     }
 }
 
