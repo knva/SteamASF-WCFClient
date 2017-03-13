@@ -42,6 +42,7 @@ namespace WCFClient
         {
             InitializeComponent();
             showInfo(a);
+            Application.ApplicationExit += new EventHandler(Application_ApplicationExit);
         }
         private void showInfo(string aux)
         {
@@ -68,9 +69,43 @@ namespace WCFClient
             pTimer.AutoReset = true;//获取该定时器自动执行
             pTimer.Enabled = true;//这个一定要写，要不然定时器不会执行的
             Control.CheckForIllegalCrossThreadCalls = false;
+            this.notifyIcon1.Text = "WCF客户端";
 
-    
         }
+        #region 隐藏任务栏图标、显示托盘图标
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            //判断是否选择的是最小化按钮 
+            if (WindowState == FormWindowState.Minimized)
+            {
+                //托盘显示图标等于托盘图标对象 
+                //注意notifyIcon1是控件的名字而不是对象的名字 
+                //notifyIcon1.Icon = ico;
+                //隐藏任务栏区图标 
+                this.ShowInTaskbar = false;
+                //图标显示在托盘区 
+                notifyIcon1.Visible = true;
+            }
+        }
+        #endregion
+
+        #region 还原窗体
+        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        {
+            //判断是否已经最小化于托盘 
+            if (WindowState == FormWindowState.Minimized)
+            {
+                //还原窗体显示 
+                WindowState = FormWindowState.Normal;
+                //激活窗体并给予它焦点 
+                this.Activate();
+                //任务栏区显示图标 
+                this.ShowInTaskbar = true;
+                //托盘区图标隐藏 
+                notifyIcon1.Visible = false;
+            }
+        }
+        #endregion
         private void pTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             if (pNum == 10)
@@ -222,8 +257,7 @@ namespace WCFClient
         private void 指令手册ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             skinButton3_Click(sender, e);
-
-
+            
         }
 
         private void skinButton5_Click(object sender, EventArgs e)
@@ -242,7 +276,9 @@ namespace WCFClient
         }
         private static  Socket s;
         private static byte[] result = new byte[1024];
-        
+        Thread myThread;
+        Thread receiveThread;
+        bool threadrun = false;
         private void skinCheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (skinCheckBox1.Checked)
@@ -261,13 +297,16 @@ namespace WCFClient
                 s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); //创建一个Socket对象，如果用UDP协议，则要用SocketTyype.Dgram类型的套接字
                 s.Bind(ipe);    //绑定EndPoint对象(2000端口和ip地址)
                 s.Listen(0);    //开始监听
-                Thread myThread = new Thread(ListenClientConnect);
+                myThread = new Thread(ListenClientConnect);
+                threadrun = true;
                 myThread.Start();
             }
             else
             {
                 RemoveClipboardFormatListener(this.Handle);
+                threadrun = false;
                 s.Close();
+                
             }
         }
 
@@ -276,12 +315,18 @@ namespace WCFClient
         /// </summary>  
         private  void ListenClientConnect()
         {
-            while (true)
+            while (threadrun)
             {
+                try { 
                 Socket clientSocket = s.Accept();
                 //clientSocket.Send(Encoding.ASCII.GetBytes("Server Say Hello"));
-                Thread receiveThread = new Thread(ReceiveMessage);
+                 receiveThread = new Thread(ReceiveMessage);
                 receiveThread.Start(clientSocket);
+                }
+                catch(SocketException e)
+                {
+                    break;
+                }
             }
         }
         
@@ -292,14 +337,17 @@ namespace WCFClient
         private  void ReceiveMessage(object clientSocket)
         {
             Socket myClientSocket = (Socket)clientSocket;
-            while (true)
+            while (threadrun)
             {
                 try
                 {
                     //通过clientSocket接收数据  
                     int receiveNumber = myClientSocket.Receive(result);
                     string msg = string.Format("接收客户端{0}消息{1}", myClientSocket.RemoteEndPoint.ToString(), Encoding.ASCII.GetString(result, 0, receiveNumber));
-                    ExtractKeysAndReg(msg, 1);
+                    if (msg.Contains("-"))
+                        ExtractKeysAndReg(msg, 0);
+                    else
+                        break;
                 }
                 catch (Exception ex)
                 {
@@ -310,11 +358,19 @@ namespace WCFClient
                 }
             }
         }
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void Application_ApplicationExit(object sender, EventArgs e)
+
         {
+
+            MessageBox.Show("close");
+            // RemoveClipboardFormatListener(this.Handle);
             RemoveClipboardFormatListener(this.Handle);
+            threadrun = false;
+            myThread.Abort();
             s.Close();
+
         }
+
 
         protected override void DefWndProc(ref Message m)
         {

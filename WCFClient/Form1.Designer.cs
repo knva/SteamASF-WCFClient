@@ -57,6 +57,7 @@
             this.指令手册ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.skinButton5 = new CCWin.SkinControl.SkinButton();
             this.skinCheckBox1 = new CCWin.SkinControl.SkinCheckBox();
+            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.skinMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -405,6 +406,12 @@
             this.skinCheckBox1.UseVisualStyleBackColor = false;
             this.skinCheckBox1.CheckedChanged += new System.EventHandler(this.skinCheckBox1_CheckedChanged);
             // 
+            // notifyIcon1
+            // 
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
+            this.notifyIcon1.Text = "notifyIcon1";
+            this.notifyIcon1.Visible = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -463,6 +470,7 @@
         private System.Windows.Forms.ToolStripMenuItem 指令手册ToolStripMenuItem;
         private CCWin.SkinControl.SkinButton skinButton5;
         private CCWin.SkinControl.SkinCheckBox skinCheckBox1;
+        private System.Windows.Forms.NotifyIcon notifyIcon1;
     }
 }
 
