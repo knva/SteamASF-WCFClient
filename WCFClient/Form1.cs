@@ -90,7 +90,7 @@ namespace WCFClient
         #endregion
 
         #region 还原窗体
-        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             //判断是否已经最小化于托盘 
             if (WindowState == FormWindowState.Minimized)
@@ -467,7 +467,6 @@ namespace WCFClient
             }
             return result;
         }
-
 
 
     }
