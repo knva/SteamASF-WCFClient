@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading;
+//wcf核心部分
 
 namespace WCFClient
 {
