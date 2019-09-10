@@ -24,7 +24,7 @@ namespace WCFClient
         }
         private void skinButton1_Click(object sender, EventArgs e)
         {
-            string str = string.Format("!play {0}",skinTextBox1.Text);
+            string str = string.Format("play {0}",skinTextBox1.Text);
             showInfo( Wcf.SendCommand(str));
         }
     }
